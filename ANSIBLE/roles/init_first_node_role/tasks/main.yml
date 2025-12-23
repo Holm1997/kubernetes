@@ -32,8 +32,8 @@
 
 - name: Add link to kubectl
   shell: |
-    mkdir /root/.kube;
-    ln -s /etc/kubernetes/admin.conf /root/.kube/config;
+    mkdir -p /root/.kube;
+    if [ ! -f /root/.kube/config ]; then ln -s /etc/kubernetes/admin.conf /root/.kube/config; fi
 
 
 - name: Get coredns ip-address
@@ -54,13 +54,13 @@
 - name: Install node local dns
   shell: sudo kubectl apply -f /etc/kubernetes/manifests/node-local-dns.yml
 
-- name: Copy CNI plugin for network
-  template:
-    src: templates/kube-flannel.j2
-    dest: /etc/kubernetes/manifests/kube-flannel.yml
+    #- name: Copy CNI plugin for network
+    #template:
+    #src: templates/kube-flannel.j2
+    #dest: /etc/kubernetes/manifests/kube-flannel.yml
 
-- name: Install CNI plugin in cluster
-  shell: sudo kubectl apply -f /etc/kubernetes/manifests/kube-flannel.yml
+    #- name: Install CNI plugin in cluster
+    #shell: sudo kubectl apply -f /etc/kubernetes/manifests/kube-flannel.yml
 
 
 - name: Pull active token

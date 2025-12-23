@@ -1,19 +1,37 @@
-local_node_address: 115.115.115.91
+local_node_address: 192.168.0.5
 
 local_node_port: 6443 
 
 node_name: k-master-1
 
-k8s_cluster_name: kubernetes.holm.local
+k8s_cluster_name: kubernetes.testpoligon.ru
 
 main_image_repository: registry.k8s.io
 
-control_plane_endpoint: "115.115.115.50:7443"
+control_plane_endpoint: "192.168.0.100:7443"
 
 k8s_version: 1.31.1
 
-service_subnet: "10.244.0.0/18"
+service_subnet: "10.222.0.0/18"
 
-pod_subnet: "10.244.64.0/18"
+pod_subnet: "10.222.64.0/18"
 
 local_dns_address: 169.254.188.100 
+
+master_nodes:
+  k-master-1:
+    adr: 192.168.0.5
+    port: 6443
+  k-master-2:
+    adr: 192.168.0.6
+    port: 6443
+  k-master-3:
+    adr: 192.168.0.11
+    port: 6443
+
+master_hostname: k-master-1
+
+vip_address: 192.168.0.100
+
+vip_port: 7443
+

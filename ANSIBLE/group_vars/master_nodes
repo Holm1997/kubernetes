@@ -1,15 +1,16 @@
 master_nodes:
   k-master-1:
-    adr: <IP_ADDR>
+    adr: 192.168.0.5
     port: 6443
   k-master-2:
-    adr: <IP_ADDR>
+    adr: 192.168.0.6
     port: 6443
   k-master-3:
-    adr: <IP_ADDR>
+    adr: 192.168.0.11
     port: 6443
 
-master_hostname: <MASTER_HOST>
+master_hostname: k-master-1
 
-vip_address: <VIP_ADDR>
+vip_address: 192.168.0.100
+
 vip_port: 7443

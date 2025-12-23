@@ -1,0 +1,2 @@
+base_dir: /home/administrator/k8s
+enable_proxy: false

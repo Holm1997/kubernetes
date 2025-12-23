@@ -34,7 +34,6 @@
       - chrony
       - mc
       - vim
-      - syslog-ng
       - git
       - jq
       - conntrack
@@ -43,18 +42,6 @@
       - inetutils-ping
       - htop
       
-- name: Enable syslog
-  shell: |
-    cat <<EOF> /etc/systemd/journald.conf
-    [Journal]
-    Storage=none
-    ForwardToSyslog=yes
-
-- name: Restart jounald
-  service:
-    name: systemd-journald
-    state: restarted
-
 - name: Disable swap file
   shell: |
     sudo swapoff -a
