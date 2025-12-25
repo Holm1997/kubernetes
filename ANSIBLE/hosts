@@ -15,4 +15,6 @@ init_node
 master_nodes
 worker_nodes
 
-
+[all_master_nodes]
+init_node
+master_nodes

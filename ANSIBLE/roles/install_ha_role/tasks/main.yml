@@ -13,7 +13,7 @@
     src: templates/haproxy.j2
     dest: /etc/haproxy/haproxy.cfg
 
-- name: Cope keepalived config file
+- name: Copy keepalived config file
   template:
     src: templates/keepalived.j2
     dest: /etc/keepalived/keepalived.conf
