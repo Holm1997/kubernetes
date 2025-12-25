@@ -23,10 +23,9 @@
 
 - name: Update and install packages
   apt:
-    #update_cache: true
+    update_cache: true
     cache_valid_time: 432000
     name:
-      - iptables
       - nfs-common
       - bash-completion
       - tar
@@ -44,38 +43,38 @@
       
 - name: Disable swap file
   shell: |
-    sudo swapoff -a
-    sudo sed -i 's/\/swap.img/#\/swap.img/' /etc/fstab
+    swapoff -a
+    sed -i 's/\/swap.img/#\/swap.img/' /etc/fstab
 
 - name: Create /etc/modules-load.d/containerd.conf
   shell: |
-    sudo cat <<EOF> /etc/modules-load.d/containerd.conf 
+    cat <<EOF> /etc/modules-load.d/containerd.conf 
     overlay 
     br_netfilter 
     
 
 - name: Enable overlay and br_netfilter kernel modules
   shell: |
-    sudo modprobe overlay
-    sudo modprobe br_netfilter
+    modprobe overlay
+    modprobe br_netfilter
 
 - name: Install network rules for kubernetes
   shell: |
-    sudo cat <<EOF> /etc/sysctl.d/kubernetes.conf
+    cat <<EOF> /etc/sysctl.d/kubernetes.conf
     net.bridge.bridge-nf-call-iptables = 1
     net.bridge.bridge-nf-call-ip6tables = 1
     net.ipv4.ip_forward = 1
     net.ipv4.ip_nonlocal_bind = 1
 
 - name: Reload sysctl
-  shell: sudo sysctl --system
+  shell: sysctl --system
 
 
 - name: Copy containerd and dependencies to remote host
   block:
   - name: Copy containerd tar-archive to remote host
     copy:
-      src: '{{ base_dir }}/containerd/containerd-{{ containerd_version }}-linux-amd64.tar.gz'
+      src: '{{ base_dir }}/containerd/containerd/containerd-{{ containerd_version }}-linux-amd64.tar.gz'
       dest: /tmp
 
   - name: Copy containerd service file to remote host
@@ -85,32 +84,42 @@
 
   - name: Copy cni-plugins to remote host
     copy:
-      src: '{{ base_dir }}/cni-pluginsi/cni-plugins-linux-amd64-v{{ cni_plugins_version }}.tgz'
+      src: '{{ base_dir }}/containerd/cni-plugins/cni-plugins-linux-amd64-v{{ cni_plugins_version }}.tgz'
       dest: /tmp
 
   - name: Copy runc to remote host
     copy:
-      src: '{{ base_dir }}/runc/runc-v{{ runc_version }}.amd64'
+      src: '{{ base_dir }}/containerd/runc/runc-v{{ runc_version }}.amd64'
       dest: /tmp
 
 
-- name: Install containerd and dependencies
+- name: Install containerd
   shell: >
-    tar Cxzvf /usr/local /tmp/containerd-*.tar.gz;
+    tar Cxzvf /usr/local /tmp/containerd-{{ containerd_version }}-linux-amd64.tar.gz;
     mv /tmp/containerd.service /etc/systemd/system/containerd.service;
     systemctl daemon-reload;
     systemctl enable --now containerd;
 
-    mkdir /etc/containerd;
+    mkdir -p /etc/containerd;
     containerd config default | sudo tee /etc/containerd/config.toml > /dev/null 2>&1;
-    sudo sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml;
+    sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml;
 
     systemctl restart containerd;
 
-    install -m 755 /tmp/containerd/runc.amd64 /usr/local/sbin/runc;
+    rm -rf /tmp/containerd-{{ containerd_version }}-linux-amd64.tar.gz;
 
+
+- name: Install runc
+  shell: >
+    install -m 755 /tmp/runc-v{{ runc_version }}.amd64 /usr/local/sbin/runc; 
+    rm -rf /tmp/runc-v{{ runc_version }}.amd64
+
+
+- name: Install cni-plugins
+  shell: >  
     mkdir -p /opt/cni/bin;
-    tar Cxzvf /opt/cni/bin /tmp/containerd/cni-plugins-*.tgz;
+    tar Cxzvf /opt/cni/bin /tmp/cni-plugins-linux-amd64-v{{ cni_plugins_version }}.tgz;
+    rm -rf /tmp/cni-plugins-linux-amd64-v{{ cni_plugins_version }}.tgz;
 
 
 - name: Copy kubeadm, kubelet and kubectl to remote host
@@ -124,14 +133,19 @@
 
 - name: Install kubeadm, kubelet and kubectl
   shell: |
-    sudo mv /tmp/kubeadm/kubeadm /usr/bin/kubeadm;
-    sudo mv /tmp/kubectl /usr/bin/kubectl;
-    sudo mv /tmp/kubelet/kubelet /usr/bin/kubelet;
-    sudo mv /tmp/kubelet/kubelet.service.txt /etc/systemd/system/kubelet.service;
-    sudo mkdir /etc/systemd/system/kubelet.service.d;
-    sudo chmod 700 /usr/bin/kubeadm;
-    sudo chmod 700 /usr/bin/kubelet;
-    sudo chmod 700 /usr/bin/kubectl;
+    mv /tmp/kubeadm/kubeadm /usr/bin/kubeadm;
+    mv /tmp/kubectl /usr/bin/kubectl;
+    mv /tmp/kubelet/kubelet /usr/bin/kubelet;
+    mv /tmp/kubelet/kubelet.service.txt /etc/systemd/system/kubelet.service;
+
+    mkdir -p /etc/systemd/system/kubelet.service.d;
+
+    chmod 700 /usr/bin/kubeadm;
+    chmod 700 /usr/bin/kubelet;
+    chmod 700 /usr/bin/kubectl;
+
+    rm -rf /tmp/kubeadm /tmp/kubelet;
+
   ignore_errors: true
 
 - name: Copy kubelet service config file

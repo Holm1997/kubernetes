@@ -1,4 +1,4 @@
-base_dir: /home/administrator/k8s
+base_dir: /home/administrator/kubernetes
 
 containerd_version: 2.2.0
 cni_plugins_version: 1.9.0
