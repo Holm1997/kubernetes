@@ -70,15 +70,34 @@
 - name: Reload sysctl
   shell: sudo sysctl --system
 
-- name: Copy containerd to remote host
-  copy:
-    src: '{{ base_dir }}/containerd'
-    dest: /tmp
 
-- name: Install containerd
+- name: Copy containerd and dependencies to remote host
+  block:
+  - name: Copy containerd tar-archive to remote host
+    copy:
+      src: '{{ base_dir }}/containerd/containerd-{{ containerd_version }}-linux-amd64.tar.gz'
+      dest: /tmp
+
+  - name: Copy containerd service file to remote host
+    copy:
+      src: containerd.service
+      dest: /tmp
+
+  - name: Copy cni-plugins to remote host
+    copy:
+      src: '{{ base_dir }}/cni-pluginsi/cni-plugins-linux-amd64-v{{ cni_plugins_version }}.tgz'
+      dest: /tmp
+
+  - name: Copy runc to remote host
+    copy:
+      src: '{{ base_dir }}/runc/runc-v{{ runc_version }}.amd64'
+      dest: /tmp
+
+
+- name: Install containerd and dependencies
   shell: >
-    tar Cxzvf /usr/local /tmp/containerd/containerd-1.7.22-linux-amd64.tar.gz;
-    mv /tmp/containerd/containerd.service.txt /etc/systemd/system/containerd.service;
+    tar Cxzvf /usr/local /tmp/containerd-*.tar.gz;
+    mv /tmp/containerd.service /etc/systemd/system/containerd.service;
     systemctl daemon-reload;
     systemctl enable --now containerd;
 
@@ -91,19 +110,17 @@
     install -m 755 /tmp/containerd/runc.amd64 /usr/local/sbin/runc;
 
     mkdir -p /opt/cni/bin;
-    tar Cxzvf /opt/cni/bin /tmp/containerd/cni-plugins-linux-amd64-v1.5.1.tgz;
+    tar Cxzvf /opt/cni/bin /tmp/containerd/cni-plugins-*.tgz;
 
-    tar Cxzvf /usr/bin /tmp/containerd/crictl/crictl-v1.31.1-linux-amd64.tar.gz;
-    sudo cp /tmp/containerd/crictl/crictl.yaml.txt /etc/crictl.yaml;
 
 - name: Copy kubeadm, kubelet and kubectl to remote host
   copy:
     src: "{{ item }}"
     dest: /tmp
   with_items:
-    - '{{ base_dir }}/kubeadm'
-    - '{{ base_dir }}/kubelet'
-    - '{{ base_dir }}/kubectl'
+    - '{{ base_dir }}/{{ k8s_version }}/kubeadm'
+    - '{{ base_dir }}/{{ k8s_version }}/kubelet'
+    - '{{ base_dir }}/{{ k8s_version }}/kubectl'
 
 - name: Install kubeadm, kubelet and kubectl
   shell: |

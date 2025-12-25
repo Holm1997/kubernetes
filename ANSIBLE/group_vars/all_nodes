@@ -1,2 +1,9 @@
 base_dir: /home/administrator/k8s
+
+containerd_version: 2.2.0
+cni_plugins_version: 1.9.0
+runc_version: 1.4.0
+
+k8s_version: 1.31.1
+
 enable_proxy: false
