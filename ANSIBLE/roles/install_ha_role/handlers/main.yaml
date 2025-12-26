@@ -4,5 +4,11 @@
     name: haproxy
     daemon_reload: true
     enabled: true
-    state: restarted
+    state: started
 
+- name: Restart keepalived
+  service:
+    name: keepalived
+    daemon_reload: true
+    enabled: true
+    state: restarted

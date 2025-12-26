@@ -39,29 +39,46 @@
       template:
         src: templates/haproxy.j2
         dest: /var/lib/haproxy/haproxy.cfg
-      notify: Restart haproxy
+      notify:
+        - Restart haproxy
 
 
-          #- name: Install keepalived
-          #apt:
-          #name: keepalived
-     
-          #- name: Copy HAproxy config file
-          # template:
-          #src: templates/haproxy.j2
-          #dest: /etc/haproxy/haproxy.cfg
+- name: Install keepalived
+  block:
+    - name: Create system user
+      user:
+        name: keepalived
+        system: true
+        shell: /bin/false
 
-          #- name: Copy keepalived config file
-          #template:
-          #src: templates/keepalived.j2
-          #dest: /etc/keepalived/keepalived.conf
+    - name: Create keepalived directory
+      file:
+        path: /etc/keepalived
+        state: directory
+        owner: keepalived
+        group: keepalived
+        mode: '0755'
 
-          #- name: Restart HAproxy
-          #service:
-          #name: haproxy
-          #state: restarted
+    - name: Copy keepalived binary file to remote server
+      copy:
+        src: keepalived
+        dest: /usr/local/sbin
+        owner: keepalived
+        group: keepalived
+        mode: '0700'
 
-          #- name: Restart keepalived
-          #service:
-          #name: keepalived
-          #state: restarted
+    - name: Copy keepalived service file to remote server
+      copy:
+        src: keepalived.service
+        dest: /etc/systemd/system
+
+    - name: Copy keepalived config file to remote server
+      template:
+        src: templates/keepalived.j2
+        dest: /etc/keepalived/keepalived.conf
+      notify:
+        - Restart keepalived
+    - name: Restart
+      service:
+        name: keepalived
+        state: restarted
