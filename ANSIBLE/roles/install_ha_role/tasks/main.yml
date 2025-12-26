@@ -1,31 +1,67 @@
 ---
-- name: Install HAproxy
-  apt:
-    name: haproxy
-    update_cache: yes
+- name: Install haproxy
+  block:
+    - name: Create haproxy directory
+      file:
+        path: /var/lib/haproxy
+        state: directory
+        mode: '0755'
 
-- name: Install keepalived
-  apt:
-    name: keepalived
+    - name: Create system user
+      user:
+        name: haproxy
+        system: true
+        home: /var/lib/haproxy
+        shell: /bin/false
+
+    - name: Create pid directory
+      file:
+        path: /var/run/haproxy
+        state: directory
+        owner: haproxy
+        group: haproxy
+        mode: '0755'
+
+    - name: Copy haproxy binary file to remote server
+      copy:
+        src: haproxy
+        dest: /usr/local/sbin
+        mode: '0700'
+        owner: haproxy
+        group: haproxy
+
+    - name: Copy haproxy service file to remote server
+      copy:
+        src: haproxy.service
+        dest: /etc/systemd/system
+
+    - name: Copy haproxy config file
+      template:
+        src: templates/haproxy.j2
+        dest: /var/lib/haproxy/haproxy.cfg
+      notify: Restart haproxy
+
+
+          #- name: Install keepalived
+          #apt:
+          #name: keepalived
      
-- name: Copy HAproxy config file
-  template:
-    src: templates/haproxy.j2
-    dest: /etc/haproxy/haproxy.cfg
+          #- name: Copy HAproxy config file
+          # template:
+          #src: templates/haproxy.j2
+          #dest: /etc/haproxy/haproxy.cfg
 
-- name: Copy keepalived config file
-  template:
-    src: templates/keepalived.j2
-    dest: /etc/keepalived/keepalived.conf
+          #- name: Copy keepalived config file
+          #template:
+          #src: templates/keepalived.j2
+          #dest: /etc/keepalived/keepalived.conf
 
-- name: Restart HAproxy
-  service:
-    name: haproxy
-    state: restarted
+          #- name: Restart HAproxy
+          #service:
+          #name: haproxy
+          #state: restarted
 
-- name: Restart keepalived
-  service:
-    name: keepalived
-    state: restarted
-
-
+          #- name: Restart keepalived
+          #service:
+          #name: keepalived
+          #state: restarted

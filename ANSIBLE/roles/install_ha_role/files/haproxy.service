@@ -1,0 +1,14 @@
+[Unit]
+Description=HAProxy Load Balancer
+After=network.target
+
+[Service]
+Type=forking
+WorkingDirectory=/var/lib/haproxy
+ExecStart=/usr/local/sbin/haproxy -f haproxy.cfg
+ExecReload=/usr/local/sbin/haproxy -f haproxy.cfg -c -q
+Restart=always
+RestartSec=2s
+
+[Install]
+WantedBy=multi-user.target
