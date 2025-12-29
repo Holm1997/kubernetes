@@ -26,6 +26,7 @@
     update_cache: true
     cache_valid_time: 432000
     name:
+      - iptables
       - nfs-common
       - bash-completion
       - tar
@@ -101,7 +102,7 @@
     systemctl enable --now containerd;
 
     mkdir -p /etc/containerd;
-    containerd config default | sudo tee /etc/containerd/config.toml > /dev/null 2>&1;
+    containerd config default | tee /etc/containerd/config.toml > /dev/null 2>&1;
     sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml;
 
     systemctl restart containerd;

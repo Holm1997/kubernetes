@@ -1,0 +1,18 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: whoami2
+  namespace: default
+spec:
+  parentRefs:
+    - name: traefik-prod-gateway-1 # Name of the Gateway that Traefik creates when you enable the Gateway API provider
+  hostnames:
+    - "whoami2"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: whoami2
+          port: 82

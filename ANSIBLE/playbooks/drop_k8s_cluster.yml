@@ -1,5 +1,4 @@
 - name: Drop K8S cluster
   hosts: all_nodes
-  become: yes
   roles:
     - ../roles/drop_k8s_cluster_role

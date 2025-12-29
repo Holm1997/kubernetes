@@ -1,0 +1,25 @@
+---
+- name: Update containerd config
+  shell: >
+    sed -i "s|config_path = '/etc/containerd/certs.d:/etc/docker/certs.d'|config_path = '/etc/containerd/certs.d'|" /etc/containerd/config.toml
+
+- name: Create registry config path
+  file:
+    name: /etc/containerd/certs.d
+    state: directory
+
+- name: Create registry directory
+  file:
+    name: /etc/containerd/certs.d/{{ registry }}
+    state: directory
+
+- name: Add registry to config path
+  template:
+    src: templates/hosts.j2
+    dest: /etc/containerd/certs.d/{{ registry }}/hosts.toml
+
+- name: Restart containerd
+  service:
+    name: containerd
+    state: restarted
+

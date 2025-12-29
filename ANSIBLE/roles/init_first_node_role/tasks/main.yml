@@ -1,6 +1,8 @@
 ---
 - name: Reset initial master node
-  shell: sudo kubeadm reset -f
+  shell: kubeadm reset -f
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['all_nodes'] }}"
   ignore_errors: true
 
 
@@ -8,6 +10,8 @@
   file:
     path: /etc/kubernetes
     state: absent
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['all_nodes'] }}"
   ignore_errors: true
 
 
@@ -27,17 +31,17 @@
 
 
 - name: Run init first control plane
-  shell: sudo kubeadm init --config /etc/kubernetes/kubeadm-conf.yml
+  shell: kubeadm init --config /etc/kubernetes/kubeadm-conf.yml
 
 
 - name: Add link to kubectl
   shell: |
     mkdir -p /root/.kube;
-    if [ ! -f /root/.kube/config ]; then ln -s /etc/kubernetes/admin.conf /root/.kube/config; fi
+    cp /etc/kubernetes/admin.conf /root/.kube/config;
 
 
 - name: Get coredns ip-address
-  shell: sudo kubectl -n kube-system get svc kube-dns -o jsonpath='{.spec.clusterIP}'
+  shell: kubectl -n kube-system get svc kube-dns -o jsonpath='{.spec.clusterIP}'
   register: dns_ip
 
 
@@ -52,7 +56,7 @@
 
 
 - name: Install node local dns
-  shell: sudo kubectl apply -f /etc/kubernetes/manifests/node-local-dns.yml
+  shell: kubectl apply -f /etc/kubernetes/manifests/node-local-dns.yml
 
     #- name: Copy CNI plugin for network
     #template:
@@ -65,7 +69,7 @@
 
 - name: Pull active token
   shell: >
-      sudo kubeadm token list |
+      kubeadm token list |
       awk 'NR==2 {print $1}'
   register: ca_token
 
@@ -79,12 +83,12 @@
 
 
 - name: Pull CA key
-  shell: /bin/bash -c "sudo kubeadm init phase upload-certs --upload-certs |& tail -1"
+  shell: /bin/bash -c "kubeadm init phase upload-certs --upload-certs |& tail -1"
   register: ca_key
   
 
 - name: Pull cluster IP
-  shell: sudo kubectl config view -o jsonpath='{.clusters[0].cluster.server}' | cut -c9-
+  shell: kubectl config view -o jsonpath='{.clusters[0].cluster.server}' | cut -c9-
   register: cluster_ip
 
 - set_fact:

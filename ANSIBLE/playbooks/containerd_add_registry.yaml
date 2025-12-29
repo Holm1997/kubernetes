@@ -1,0 +1,4 @@
+- name: Add registry to containerd
+  hosts: all_nodes
+  roles:
+    - ../roles/containerd_add_registry_role

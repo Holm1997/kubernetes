@@ -1,0 +1,15 @@
+apiVersion: crd.projectcalico.org/v1
+kind: IPPool
+metadata:
+  name: pool-215
+spec:
+  cidr: 215.215.215.0/24
+  ipipMode: CrossSubnet
+  natOutgoing: true
+  disabled: false
+  nodeSelector: loc == 'datacenter1'
+  allowedUses:
+    - Workload
+    - Tunnel
+  assignmentMode: Automatic
+
