@@ -134,10 +134,9 @@
 
 - name: Install kubeadm, kubelet and kubectl
   shell: |
-    mv /tmp/kubeadm/kubeadm /usr/bin/kubeadm;
+    mv /tmp/kubeadm /usr/bin/kubeadm;
     mv /tmp/kubectl /usr/bin/kubectl;
-    mv /tmp/kubelet/kubelet /usr/bin/kubelet;
-    mv /tmp/kubelet/kubelet.service.txt /etc/systemd/system/kubelet.service;
+    mv /tmp/kubelet /usr/bin/kubelet;
 
     mkdir -p /etc/systemd/system/kubelet.service.d;
 
@@ -145,9 +144,12 @@
     chmod 700 /usr/bin/kubelet;
     chmod 700 /usr/bin/kubectl;
 
-    rm -rf /tmp/kubeadm /tmp/kubelet;
-
   ignore_errors: true
+
+- name: Copy kubelet service file
+  copy:
+    src: kubelet.service
+    dest: /etc/systemd/system
 
 - name: Copy kubelet service config file
   template:
