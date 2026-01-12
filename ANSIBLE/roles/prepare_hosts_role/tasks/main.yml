@@ -45,7 +45,7 @@
 - name: Disable swap file
   shell: |
     swapoff -a
-    sed -i 's/\/swap.img/#\/swap.img/' /etc/fstab
+    sed -i '/swap/s/^/# /' /etc/fstab
 
 - name: Create /etc/modules-load.d/containerd.conf
   shell: |
